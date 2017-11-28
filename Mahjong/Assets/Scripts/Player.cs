@@ -9,6 +9,9 @@ public class Player : Mahjong {
 
     [SerializeField]
     private Text playsideText;
+
+    [SerializeField]
+    private List<GameObject> HandObj = new List<GameObject>();
     
     // Use this for initialization
     void Start () {
@@ -29,6 +32,25 @@ public class Player : Mahjong {
 	void Update () {
 		
 	}
+
+    /// <summary>
+    /// 牌を1枚ツモってくる
+    /// </summary>
+    /// <param name="hai">取得する牌</param>
+    public void TumoHai(GameObject hai)
+    {
+        int type = (int)hai.GetComponent<Tile>().type;
+        if (this.Hand[type] > 3) Debug.LogError("tumohaioverflow");
+        this.Hand[type]++;
+
+        this.HandObj.Add(hai);
+    }
+    // 複数枚の牌をツモってくる
+    public void TumoHai(GameObject[] hais)
+    {
+        for (int i = 0; i < hais.Length; i++)
+            this.TumoHai(hais[i]);
+    }
 
     public PlaySide PlaysideProp
     {

@@ -20,7 +20,6 @@ public partial class Mahjong : MonoBehaviour
     public int income;// ツモった牌
     public int head, cntPungs, cntChows;// 雀頭、刻子のカウント、順子のカウント
 
-
     // ポン、チーの回数
     int cntPon, cntChi, cntKan;
     /// <summary>
@@ -57,21 +56,6 @@ public partial class Mahjong : MonoBehaviour
         FieldManager.CurrentPlayer = playSide;
     }
 
-    /// <summary>
-    /// 牌を1枚ツモってくる
-    /// </summary>
-    /// <param name="hai">取得する牌</param>
-    public void TumoHai(int hai)
-    {
-        if (this.Hand[hai] > 3) Debug.LogError("tumohaioverflow");
-        this.Hand[hai]++;
-    }
-    // 複数枚の牌をツモってくる
-    public void TumoHai(int[] hais)
-    {
-        for (int i = 0; i < hais.Length; i++)
-            this.TumoHai(hais[i]);
-    }
 
     /*
     // 配られた牌をリスト形式の牌としてカウントする 使わないかも
@@ -198,7 +182,7 @@ public partial class Mahjong : MonoBehaviour
     /// <param name="value"></param>
     /// <param name="checkval"></param>
     /// <returns></returns>
-    bool CheckWhichEver(int value,params int[] checkval)
+    bool CheckWhichEver(int value, params int[] checkval)
     {
         for (int i = 0; i < checkval.Length; i++)
         {
@@ -210,7 +194,7 @@ public partial class Mahjong : MonoBehaviour
     // 判定用の変数リセット
     public void ResetTmp()
     {
-        Hand.CopyTo(tmp,0);
+        Hand.CopyTo(tmp, 0);
         this.Pungs = new int[4];
         this.Chows = new int[4];
         cntChows = cntPungs = head = 0;
@@ -228,7 +212,7 @@ public partial class Mahjong : MonoBehaviour
     // tmp手牌確認用関数
     public void ShowTmp()
     {
-        for (int i = 0; i < tmp.Length; i++) print("tmp "+i + " : " + tmp[i]);
+        for (int i = 0; i < tmp.Length; i++) print("tmp " + i + " : " + tmp[i]);
     }
 
     public void ShowMentu()
