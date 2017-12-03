@@ -38,6 +38,7 @@ public class GameController : MonoBehaviour {
         DecidePlaySide();
         tileManager.InitTileManager();
         DecideInitalTumoPos();
+        Haipai();
     }
 
     // 各プレイヤーの風を決定、プレイ順に並び替え
@@ -51,6 +52,7 @@ public class GameController : MonoBehaviour {
         {
             int side = (i + 1) + 30;
             this.players[(sum - 1 + i) % PlayerNum].PlaysideProp = (PlaySide)side;
+            this.players[(sum - 1 + i) % PlayerNum].Init();
             if (PlaySide.TON == (PlaySide)side)ParentPlayer = (sum - 1 + i) % PlayerNum;
         }
         print("parent " + ParentPlayer);
@@ -66,6 +68,21 @@ public class GameController : MonoBehaviour {
         if (yama == 1) yama = 3; else if (yama == 3) yama = 1;
         InitTumoPos = yama * 34 + sum * 2;
         print("pos " + InitTumoPos);
+    }
+    void Haipai()
+    {
+        for (int cnt = 0; cnt < 3; cnt++)
+        {
+            for (int i = 0; i < players.Length; i++)
+            {
+                this.players[(ParentPlayer + i) % players.Length].TumoHai(4);
+            }
+        }
+        this.players[(ParentPlayer) % players.Length].TumoHai(2);
+        for (int i = 1; i < players.Length; i++)
+        {
+            this.players[(ParentPlayer + i) % players.Length].TumoHai();
+        }
     }
 
     // utility

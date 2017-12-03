@@ -26,12 +26,12 @@ public class MahjongTileManager : MonoBehaviour{
     Material[] tileMaterials;
     Vector3 tileSize;
     
-    int[] allTiles = new int[136];
-    List<GameObject> AllTileObj = new List<GameObject>();
+    GameObject[] AllTileObj = new GameObject[136];
     // 牌山の一番左上の牌の座標を格納
     [SerializeField]
     Vector3 YamaHaipos;
-
+    // 山牌を置く親オブジェクト
+    [SerializeField]
     Transform[] tileField;
 
     public int CurrentTumoTile = 0;
@@ -46,7 +46,6 @@ public class MahjongTileManager : MonoBehaviour{
     {
         tileSize = tilePrefab.transform.GetChild(0).GetComponent<Renderer>().bounds.size;
         InitTiles();
-        SetInitialTiles();
     }
     // 山の牌を初期化する
     private void InitTiles()
@@ -61,10 +60,12 @@ public class MahjongTileManager : MonoBehaviour{
                 }
         }
         // 牌をシャッフルする
-        allTiles = Shuffle<int>(tmp);
+        int[] allTiles = Shuffle<int>(tmp);
+
+        SetInitialTiles(allTiles);
     }
     // 牌山のObject生成
-    private void SetInitialTiles()
+    private void SetInitialTiles(int[] allTiles)
     {
         int n = 0;
         Vector3 offset = Vector3.zero;
@@ -82,6 +83,17 @@ public class MahjongTileManager : MonoBehaviour{
                 n++;
             }
         }
+    }
+
+    /// <summary>
+    /// 牌を1つ取得する関数
+    /// </summary>
+    /// <returns></returns>
+    public GameObject GetTileObj()
+    {
+        GameObject hai = this.AllTileObj[(GameController.InitTumoPos + CurrentTumoTile) % AllTileObj.Length];
+        CurrentTumoTile++;
+        return hai;
     }
 
     /*
@@ -140,5 +152,10 @@ public class MahjongTileManager : MonoBehaviour{
         obj.name = id.ToString();
         obj.AddComponent<Tile>().type = (TileType)id;
         return obj;
+    }
+
+    public Vector3 GetTileSize
+    {
+        get { return this.tileSize; }
     }
 }

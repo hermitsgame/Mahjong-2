@@ -15,7 +15,6 @@ public class Player : Mahjong {
     
     // Use this for initialization
     void Start () {
-        tileManager = GameObject.Find("FieldManager").GetComponent<MahjongTileManager>();
         // ランダムな牌を取得
         //this.Hand = tileManager.
         // 牌を生成する
@@ -33,23 +32,44 @@ public class Player : Mahjong {
 		
 	}
 
+    public void Init()
+    {
+        tileManager = GameObject.Find("FieldManager").GetComponent<MahjongTileManager>();
+    }
+
     /// <summary>
     /// 牌を1枚ツモってくる
     /// </summary>
     /// <param name="hai">取得する牌</param>
-    public void TumoHai(GameObject hai)
+    public void TumoHai()
     {
+        GameObject hai = tileManager.GetTileObj();
         int type = (int)hai.GetComponent<Tile>().type;
-        if (this.Hand[type] > 3) Debug.LogError("tumohaioverflow");
+        //print(string.Format("hand type{0} : num{1}", type,Hand[type]));
         this.Hand[type]++;
 
         this.HandObj.Add(hai);
+        this.AdjustHaipos(hai.transform, HandObj.Count);
+
+        this.income = type;
     }
     // 複数枚の牌をツモってくる
-    public void TumoHai(GameObject[] hais)
+    public void TumoHai(int num)
     {
-        for (int i = 0; i < hais.Length; i++)
-            this.TumoHai(hais[i]);
+        for (int i = 0; i < num; i++)
+            this.TumoHai();
+    }
+
+    private void AdjustHaipos(Transform hai,int num)
+    {
+        hai.SetParent(this.transform);
+        Vector3 pos = Vector3.zero;
+        pos.x = tileManager.GetTileSize.x * (num - 14);
+        hai.localPosition = pos;
+
+        Vector3 rot = this.transform.eulerAngles;
+        rot.x = -90;
+        hai.eulerAngles = rot;
     }
 
     public PlaySide PlaysideProp
