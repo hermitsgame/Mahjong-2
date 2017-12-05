@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-enum State
+public enum State
 {
     HAIPAI,
     GAME,
@@ -10,7 +10,7 @@ enum State
 }
 public class GameController : MonoBehaviour {
 
-    private State state = State.HAIPAI;
+    private static State state = State.HAIPAI;
     [SerializeField]
     private Player[] players;
 
@@ -24,6 +24,7 @@ public class GameController : MonoBehaviour {
 
     // Use this for initialization
     void Start() {
+        state = State.HAIPAI;
         tileManager = GameObject.Find("FieldManager").GetComponent<MahjongTileManager>();
         InitGame();
 
@@ -39,6 +40,7 @@ public class GameController : MonoBehaviour {
         tileManager.InitTileManager();
         DecideInitalTumoPos();
         Haipai();
+        state = State.GAME;
     }
 
     // 各プレイヤーの風を決定、プレイ順に並び替え
@@ -105,5 +107,11 @@ public class GameController : MonoBehaviour {
         {
             array[len - index + j] = tmp[j];
         }
+    }
+
+    public static State GameStateProp
+    {
+        get { return state; }
+        set { state = value; }
     }
 }
