@@ -1,8 +1,17 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+
+public enum PlayerState
+{
+    TUMO,
+    CUT_TILE,
+    ARRANGE,
+    END_TURN
+}
 public class Player : Mahjong {
 
     MahjongTileManager tileManager;
@@ -12,7 +21,11 @@ public class Player : Mahjong {
 
     [SerializeField]
     private List<GameObject> HandObj = new List<GameObject>();
-    
+
+    private Transform handField;
+
+    private PlayerState state = PlayerState.TUMO;
+
     // Use this for initialization
     void Start () {
         // ランダムな牌を取得
@@ -29,12 +42,29 @@ public class Player : Mahjong {
 	
 	// Update is called once per frame
 	void Update () {
+        if (GameController.GameStateProp == State.GAME)
+        {
+            switch (this.state)
+            {
+                case PlayerState.TUMO:
+                    this.ArrangeHand();
+                    this.state = PlayerState.CUT_TILE;
+                    break;
+                case PlayerState.CUT_TILE:
+                    if (Input.GetMouseButtonDown(0))
+                    {
+
+                    }
+                    break;
+            }
+        }
 		
 	}
 
     public void Init()
     {
         tileManager = GameObject.Find("FieldManager").GetComponent<MahjongTileManager>();
+        this.handField = this.transform.Find("Hand");
     }
 
     /// <summary>
@@ -62,14 +92,33 @@ public class Player : Mahjong {
 
     private void AdjustHaipos(Transform hai,int num)
     {
-        hai.SetParent(this.transform);
+        hai.SetParent(this.handField);
         Vector3 pos = Vector3.zero;
         pos.x = tileManager.GetTileSize.x * (num - 14);
+        if (num == 14) pos.x = tileManager.GetTileSize.x;
         hai.localPosition = pos;
 
         Vector3 rot = this.transform.eulerAngles;
         rot.x = -90;
         hai.eulerAngles = rot;
+    }
+    // リーパイする
+    private void ArrangeHand()
+    {
+        HandObj.Sort((a, b) =>
+            (int)a.GetComponent<Tile>().type - (int)b.GetComponent<Tile>().type);
+
+        for (int i = 0; i < HandObj.Count; i++)
+        {
+            AdjustHaipos(HandObj[i].transform, i);
+        }
+    }
+
+    /// <summary>
+    /// 選択した牌を切る動作を行う
+    /// </summary>
+    private void SelectTile()
+    {
     }
 
     public PlaySide PlaysideProp
