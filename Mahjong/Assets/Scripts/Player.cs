@@ -55,14 +55,17 @@ public class Player : Mahjong {
             {
                 case PlayerState.TUMO:
                     this.TumoHai();
+                    this.TumoCheck();
                     this.state = PlayerState.CUT_TILE;
                     break;
                 case PlayerState.CUT_TILE:
                     if (Input.GetMouseButtonDown(0))
                     {
                         CutTile();
-                        EndTurn();
                     }
+                    break;
+                case PlayerState.END_TURN:
+                    this.state = PlayerState.TUMO;
                     break;
                 default:
                     break;
@@ -86,7 +89,9 @@ public class Player : Mahjong {
     public void TumoHai()
     {
         GameObject hai = tileManager.GetTileObj();
-        int type = (int)hai.GetComponent<Tile>().type;
+        Tile tile = hai.GetComponent<Tile>();
+        int type = (int)tile.type;
+        tile.isHand = true;
         //print(string.Format("hand type{0} : num{1}", type,Hand[type]));
         this.Hand[type]++;
 
@@ -94,6 +99,7 @@ public class Player : Mahjong {
         this.ToHandPos(hai.transform, HandObj.Count, TumoTime);
 
         this.income = type;
+
     }
     // 複数枚の牌をツモってくる
     public void TumoHai(int num)
@@ -104,7 +110,9 @@ public class Player : Mahjong {
 
     public void TrashHai(GameObject hai)
     {
-        int type = (int)hai.GetComponent<Tile>().type;
+        Tile tile = hai.GetComponent<Tile>();
+        tile.isHand = false;
+        int type = (int)tile.type;
         this.Hand[type]--;
         this.HandObj.Remove(hai);
         
@@ -129,7 +137,8 @@ public class Player : Mahjong {
         Vector3 destRot = Vector3.zero;
         destRot.x = -90;
 
-        StartCoroutine(Rotate(hai, destRot, duration));
+        //StartCoroutine(Rotate(hai, destRot, duration));
+        hai.localEulerAngles = Vector3.zero;
     }
 
     void ToTrashPos(Transform hai, float duration)
@@ -143,9 +152,11 @@ public class Player : Mahjong {
 
         Vector3 destPos = Vector3.zero;
         destPos.x = col * tileManager.GetTileSize.x;
-        destPos.z = - row * tileManager.GetTileSize.y;
+        destPos.z = - row * tileManager.GetTileSize.z;
 
         StartCoroutine(Move(hai, destPos, duration));
+
+        ArrangeHand();
     }
 
     IEnumerator Move(Transform hai, Vector3 dest, float duration)
@@ -197,8 +208,14 @@ public class Player : Mahjong {
         {
             if (hit.collider.CompareTag("Tile"))
             {
+                print("Cut " + this.gameObject.name);
                 Tile t = hit.collider.GetComponentInParent<Tile>();
-                ToTrashPos(t.transform, 0.2f);
+                if (t.isHand)
+                {
+                    ToTrashPos(t.transform, 0.2f);
+
+                    EndTurn();
+                }
             }
         }
     }
@@ -207,8 +224,8 @@ public class Player : Mahjong {
     {
         FieldManager.PassMyTurn(this.playSide);
         GameController gc = GameObject.Find("GameController").GetComponent<GameController>();
-        int id = (int)FieldManager.CurrentPlayer % 30;
-        gc.SwitchCamera(id);
+        gc.SwitchCamera(gc.GetNextPlayerID(this.playSide));
+        this.state = PlayerState.END_TURN;
     }
 
     public PlaySide PlaysideProp

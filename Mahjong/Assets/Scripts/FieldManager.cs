@@ -32,8 +32,10 @@ public class FieldManager :MonoBehaviour{
     /// <param name="player"></param>
     public static void PassMyTurn(PlaySide player)
     {
-        PlaySide next = (PlaySide)(byte)player++;
-        CurrentPlayer = next;
+        int next = (byte)player;
+        next++;
+        if (next == 35) next = 31;
+        CurrentPlayer = (PlaySide)next;
     }
     /// <summary>
     /// プレイヤーの手番かどうかを返す

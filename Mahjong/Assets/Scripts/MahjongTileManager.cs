@@ -15,6 +15,7 @@ public class Tile:MonoBehaviour
 {
     public TileType type;
     public bool isAkadora = false;
+    public bool isHand = false;
 }
 public class MahjongTileManager : MonoBehaviour{
 

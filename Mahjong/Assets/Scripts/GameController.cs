@@ -15,7 +15,8 @@ public class GameController : MonoBehaviour {
     private float HaipaiInterval = 0.2f;
     [SerializeField]
     private Player[] players;
-    private Camera[] cameras = new Camera[4];
+    [SerializeField]
+    private Camera[] cameras;
 
 
     [SerializeField]
@@ -56,12 +57,12 @@ public class GameController : MonoBehaviour {
         for (int i = 0; i < PlayerNum; i++)
         {
             int side = (i + 1) + 30;
-            this.players[(sum - 1 + i) % PlayerNum].PlaysideProp = (PlaySide)side;
-            this.players[(sum - 1 + i) % PlayerNum].Init();
-            if (PlaySide.TON == (PlaySide)side)ParentPlayer = (sum - 1 + i) % PlayerNum;
+            int index = (sum - 1 + i) % PlayerNum;
+            this.players[index].PlaysideProp = (PlaySide)side;
+            this.players[index].Init();
+            this.cameras[index] = this.players[index].GetCamera;
+            if (PlaySide.TON == (PlaySide)side)ParentPlayer = index;
         }
-        for (int i = 0; i < cameras.Length; i++)
-            this.cameras[i] = this.players[i].GetCamera;
 
         SwitchCamera(ParentPlayer);
         print("parent " + ParentPlayer);
@@ -127,6 +128,22 @@ public class GameController : MonoBehaviour {
         {
             array[len - index + j] = tmp[j];
         }
+    }
+
+    /// <summary>
+    /// playersの引数のIndexを返す
+    /// </summary>
+    /// <param name="side">PlaySide</param>
+    /// <returns></returns>
+    public int GetPlayerID(PlaySide side)
+    {
+        int id = ((byte)side % 30) - 1;
+        return (ParentPlayer + id) % PlayerNum;
+    }
+
+    public int GetNextPlayerID(PlaySide side)
+    {
+        return (GetPlayerID(side) + 1) % PlayerNum;
     }
 
     public static State GameStateProp
