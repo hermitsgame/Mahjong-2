@@ -12,7 +12,11 @@ public class GameController : MonoBehaviour {
 
     private static State state = State.HAIPAI;
     [SerializeField]
+    private float HaipaiInterval = 0.2f;
+    [SerializeField]
     private Player[] players;
+    private Camera[] cameras = new Camera[4];
+
 
     [SerializeField]
     private int PlayerNum = 4;
@@ -39,8 +43,7 @@ public class GameController : MonoBehaviour {
         DecidePlaySide();
         tileManager.InitTileManager();
         DecideInitalTumoPos();
-        Haipai();
-        state = State.GAME;
+        StartCoroutine(Haipai());
     }
 
     // 各プレイヤーの風を決定、プレイ順に並び替え
@@ -57,6 +60,10 @@ public class GameController : MonoBehaviour {
             this.players[(sum - 1 + i) % PlayerNum].Init();
             if (PlaySide.TON == (PlaySide)side)ParentPlayer = (sum - 1 + i) % PlayerNum;
         }
+        for (int i = 0; i < cameras.Length; i++)
+            this.cameras[i] = this.players[i].GetCamera;
+
+        SwitchCamera(ParentPlayer);
         print("parent " + ParentPlayer);
     }
     // サイコロを振り、最初の牌を取る位置を決定、牌の順番を並び替え
@@ -71,20 +78,33 @@ public class GameController : MonoBehaviour {
         InitTumoPos = yama * 34 + sum * 2;
         print("pos " + InitTumoPos);
     }
-    void Haipai()
+    IEnumerator Haipai()
     {
         for (int cnt = 0; cnt < 3; cnt++)
         {
             for (int i = 0; i < players.Length; i++)
             {
                 this.players[(ParentPlayer + i) % players.Length].TumoHai(4);
+                yield return new WaitForSeconds(HaipaiInterval);
             }
         }
-        this.players[(ParentPlayer) % players.Length].TumoHai(2);
-        for (int i = 1; i < players.Length; i++)
+        for (int i = 0; i < players.Length; i++)
         {
             this.players[(ParentPlayer + i) % players.Length].TumoHai();
+            yield return new WaitForSeconds(HaipaiInterval);
         }
+        for (int i = 0; i < players.Length; i++)
+        {
+            this.players[(ParentPlayer + i) % players.Length].ArrangeHand();
+        }
+        state = State.GAME;
+    }
+
+    public void SwitchCamera(int id)
+    {
+        foreach (Camera c in cameras)
+            c.enabled = false;
+        cameras[id].enabled = true;
     }
 
     // utility

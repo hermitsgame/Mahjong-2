@@ -25,6 +25,16 @@ public class FieldManager :MonoBehaviour{
     void Update() {
 
     }
+
+    /// <summary>
+    /// 次のプレイヤーの順番にする
+    /// </summary>
+    /// <param name="player"></param>
+    public static void PassMyTurn(PlaySide player)
+    {
+        PlaySide next = (PlaySide)(byte)player++;
+        CurrentPlayer = next;
+    }
     /// <summary>
     /// プレイヤーの手番かどうかを返す
     /// </summary>

@@ -4,12 +4,12 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class MainUIController : MonoBehaviour {
-    
-    [SerializeField]
-    private Camera[] cameras;
+
+    GameController gameController;
 
 	// Use this for initialization
 	void Start () {
+        this.gameController = GameObject.Find("GameController").GetComponent<GameController>();
 	}
 	
 	// Update is called once per frame
@@ -19,8 +19,6 @@ public class MainUIController : MonoBehaviour {
 
     public void SwitchCamera(int id)
     {
-        foreach (Camera c in cameras)
-            c.enabled = false;
-        cameras[id].enabled = true;
+        this.gameController.SwitchCamera(id);
     }
 }

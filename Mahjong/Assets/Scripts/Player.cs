@@ -9,7 +9,6 @@ public enum PlayerState
 {
     TUMO,
     CUT_TILE,
-    ARRANGE,
     END_TURN
 }
 public class Player : Mahjong {
@@ -22,12 +21,20 @@ public class Player : Mahjong {
     [SerializeField]
     private List<GameObject> HandObj = new List<GameObject>();
 
-    private Transform handField;
+    [SerializeField]
+    private List<GameObject> TrashObj = new List<GameObject>();
+
+    private Transform handField, trashField;
 
     private PlayerState state = PlayerState.TUMO;
 
+    private Camera myCamera;
+
+    [SerializeField]
+    private float TumoTime = 0.1f;
+
     // Use this for initialization
-    void Start () {
+    void Start() {
         // ランダムな牌を取得
         //this.Hand = tileManager.
         // 牌を生成する
@@ -39,32 +46,37 @@ public class Player : Mahjong {
         // 手持ち牌の面子チェック
         //TumoCheck();
     }
-	
-	// Update is called once per frame
-	void Update () {
-        if (GameController.GameStateProp == State.GAME)
+
+    // Update is called once per frame
+    void Update() {
+        if (GameController.GameStateProp == State.GAME && FieldManager.IsMyTurn(this.PlaysideProp))
         {
             switch (this.state)
             {
                 case PlayerState.TUMO:
-                    this.ArrangeHand();
+                    this.TumoHai();
                     this.state = PlayerState.CUT_TILE;
                     break;
                 case PlayerState.CUT_TILE:
                     if (Input.GetMouseButtonDown(0))
                     {
-
+                        CutTile();
+                        EndTurn();
                     }
+                    break;
+                default:
                     break;
             }
         }
-		
-	}
+
+    }
 
     public void Init()
     {
         tileManager = GameObject.Find("FieldManager").GetComponent<MahjongTileManager>();
         this.handField = this.transform.Find("Hand");
+        this.trashField = this.transform.Find("Trash");
+        this.myCamera = this.transform.GetComponentInChildren<Camera>();
     }
 
     /// <summary>
@@ -79,7 +91,7 @@ public class Player : Mahjong {
         this.Hand[type]++;
 
         this.HandObj.Add(hai);
-        this.AdjustHaipos(hai.transform, HandObj.Count);
+        this.ToHandPos(hai.transform, HandObj.Count, TumoTime);
 
         this.income = type;
     }
@@ -90,35 +102,113 @@ public class Player : Mahjong {
             this.TumoHai();
     }
 
-    private void AdjustHaipos(Transform hai,int num)
+    public void TrashHai(GameObject hai)
+    {
+        int type = (int)hai.GetComponent<Tile>().type;
+        this.Hand[type]--;
+        this.HandObj.Remove(hai);
+        
+        this.TrashObj.Add(hai);
+        /*
+        TrashObj.ForEach((GameObject g) =>
+        {
+            print(g.GetComponent<Tile>().type);
+        });
+        */
+    }
+
+    void ToHandPos(Transform hai, int num, float duration)
     {
         hai.SetParent(this.handField);
-        Vector3 pos = Vector3.zero;
-        pos.x = tileManager.GetTileSize.x * (num - 14);
-        if (num == 14) pos.x = tileManager.GetTileSize.x;
-        hai.localPosition = pos;
+        Vector3 destPos = Vector3.zero;
+        destPos.x = tileManager.GetTileSize.x * (num - 14);
+        if (num == 14) destPos.x = tileManager.GetTileSize.x;
 
-        Vector3 rot = this.transform.eulerAngles;
-        rot.x = -90;
-        hai.eulerAngles = rot;
+        hai.localPosition = destPos;
+
+        Vector3 destRot = Vector3.zero;
+        destRot.x = -90;
+
+        StartCoroutine(Rotate(hai, destRot, duration));
+    }
+
+    void ToTrashPos(Transform hai, float duration)
+    {
+        hai.SetParent(trashField);
+        hai.localEulerAngles = Vector3.zero;
+        int tileCnt = this.TrashObj.Count;
+        int row = tileCnt / 6; int col = tileCnt % 6;
+
+        this.TrashHai(hai.gameObject);
+
+        Vector3 destPos = Vector3.zero;
+        destPos.x = col * tileManager.GetTileSize.x;
+        destPos.z = - row * tileManager.GetTileSize.y;
+
+        StartCoroutine(Move(hai, destPos, duration));
+    }
+
+    IEnumerator Move(Transform hai, Vector3 dest, float duration)
+    {
+        float startTime = Time.time;
+        Vector3 startPos = hai.localPosition;
+        for (; Time.time - startTime < duration;)
+        {
+            hai.localPosition = Vector3.Lerp(startPos, dest, (Time.time - startTime) / duration);
+            yield return null;
+        }
+        hai.localPosition = dest;
+    }
+    IEnumerator Rotate(Transform hai, Vector3 dest, float duration)
+    {
+        float startTime = Time.time;
+        Vector3 startRot = Vector3.zero;
+        for (; Time.time - startTime < duration;)
+        {
+            hai.localEulerAngles = Vector3.Lerp(startRot, dest, (Time.time - startTime) / duration);
+            yield return null;
+        }
+        hai.localEulerAngles = dest;
     }
     // リーパイする
-    private void ArrangeHand()
+    public void ArrangeHand()
     {
         HandObj.Sort((a, b) =>
             (int)a.GetComponent<Tile>().type - (int)b.GetComponent<Tile>().type);
 
         for (int i = 0; i < HandObj.Count; i++)
         {
-            AdjustHaipos(HandObj[i].transform, i);
+            ToHandPos(HandObj[i].transform, i,0f);
         }
     }
 
     /// <summary>
     /// 選択した牌を切る動作を行う
     /// </summary>
-    private void SelectTile()
+    private void CutTile()
     {
+        Ray ray = myCamera.ScreenPointToRay(Input.mousePosition);
+
+        int layerMask = 1 << 8;
+
+        Debug.DrawRay(ray.origin, ray.direction * 20.0f, Color.red,2.0f);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit, 20.0f, layerMask))
+        {
+            if (hit.collider.CompareTag("Tile"))
+            {
+                Tile t = hit.collider.GetComponentInParent<Tile>();
+                ToTrashPos(t.transform, 0.2f);
+            }
+        }
+    }
+
+    private void EndTurn()
+    {
+        FieldManager.PassMyTurn(this.playSide);
+        GameController gc = GameObject.Find("GameController").GetComponent<GameController>();
+        int id = (int)FieldManager.CurrentPlayer % 30;
+        gc.SwitchCamera(id);
     }
 
     public PlaySide PlaysideProp
@@ -146,5 +236,9 @@ public class Player : Mahjong {
                     break;
             }
         }
+    }
+    public Camera GetCamera
+    {
+        get { return this.myCamera; }
     }
 }
