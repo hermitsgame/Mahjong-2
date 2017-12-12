@@ -560,4 +560,22 @@ public partial class Mahjong : MonoBehaviour {
             return true;
         return false;
     }
+    /*
+    bool canChi()
+    {
+
+    }
+    bool canPon()
+    {
+        Tile trash = FieldManager.TrashTile;
+        for (int i = 1; i < this.Hand.Length; i++)
+        {
+
+        }
+    }
+
+    bool canKan()
+    {
+    }
+    */
 }

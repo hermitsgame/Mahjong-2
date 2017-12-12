@@ -6,6 +6,7 @@ public enum State
 {
     HAIPAI,
     GAME,
+    WAIT,
     RESULT,
 }
 public class GameController : MonoBehaviour {

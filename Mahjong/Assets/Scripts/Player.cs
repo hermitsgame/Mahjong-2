@@ -9,11 +9,13 @@ public enum PlayerState
 {
     TUMO,
     CUT_TILE,
-    END_TURN
+    END_TURN,
+    WAIT_NAKI
 }
 public class Player : Mahjong {
 
     MahjongTileManager tileManager;
+    FieldManager fieldManager;
 
     [SerializeField]
     private Text playsideText;
@@ -21,8 +23,7 @@ public class Player : Mahjong {
     [SerializeField]
     private List<GameObject> HandObj = new List<GameObject>();
 
-    [SerializeField]
-    private List<GameObject> TrashObj = new List<GameObject>();
+    private int trashTileNum = 0;
 
     private Transform handField, trashField;
 
@@ -49,26 +50,33 @@ public class Player : Mahjong {
 
     // Update is called once per frame
     void Update() {
-        if (GameController.GameStateProp == State.GAME && FieldManager.IsMyTurn(this.PlaysideProp))
+        if (GameController.GameStateProp == State.GAME)
         {
-            switch (this.state)
+            if (FieldManager.IsMyTurn(this.PlaysideProp))
             {
-                case PlayerState.TUMO:
-                    this.TumoHai();
-                    this.TumoCheck();
-                    this.state = PlayerState.CUT_TILE;
-                    break;
-                case PlayerState.CUT_TILE:
-                    if (Input.GetMouseButtonDown(0))
-                    {
-                        CutTile();
-                    }
-                    break;
-                case PlayerState.END_TURN:
-                    this.state = PlayerState.TUMO;
-                    break;
-                default:
-                    break;
+                switch (this.state)
+                {
+                    case PlayerState.TUMO:
+                        this.TumoHai();
+                        this.TumoCheck();
+                        this.state = PlayerState.CUT_TILE;
+                        break;
+                    case PlayerState.CUT_TILE:
+                        if (Input.GetMouseButtonDown(0))
+                        {
+                            CutTile();
+                        }
+                        break;
+                    case PlayerState.END_TURN:
+                        this.state = PlayerState.TUMO;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                // canNaki
             }
         }
 
@@ -77,9 +85,11 @@ public class Player : Mahjong {
     public void Init()
     {
         tileManager = GameObject.Find("FieldManager").GetComponent<MahjongTileManager>();
+        fieldManager = GameObject.Find("FieldManager").GetComponent<FieldManager>();
         this.handField = this.transform.Find("Hand");
         this.trashField = this.transform.Find("Trash");
         this.myCamera = this.transform.GetComponentInChildren<Camera>();
+        this.trashTileNum = 0;
     }
 
     /// <summary>
@@ -92,6 +102,7 @@ public class Player : Mahjong {
         Tile tile = hai.GetComponent<Tile>();
         int type = (int)tile.type;
         tile.isHand = true;
+        tile.tileOwner = this.PlaysideProp;
         //print(string.Format("hand type{0} : num{1}", type,Hand[type]));
         this.Hand[type]++;
 
@@ -115,8 +126,8 @@ public class Player : Mahjong {
         int type = (int)tile.type;
         this.Hand[type]--;
         this.HandObj.Remove(hai);
-        
-        this.TrashObj.Add(hai);
+
+        this.fieldManager.AddTrashObj(hai);
         /*
         TrashObj.ForEach((GameObject g) =>
         {
@@ -145,7 +156,8 @@ public class Player : Mahjong {
     {
         hai.SetParent(trashField);
         hai.localEulerAngles = Vector3.zero;
-        int tileCnt = this.TrashObj.Count;
+        int tileCnt = this.trashTileNum;
+        this.trashTileNum++;
         int row = tileCnt / 6; int col = tileCnt % 6;
 
         this.TrashHai(hai.gameObject);
@@ -208,12 +220,11 @@ public class Player : Mahjong {
         {
             if (hit.collider.CompareTag("Tile"))
             {
-                print("Cut " + this.gameObject.name);
                 Tile t = hit.collider.GetComponentInParent<Tile>();
                 if (t.isHand)
                 {
                     ToTrashPos(t.transform, 0.2f);
-
+                    FieldManager.TrashTile = t.type;
                     EndTurn();
                 }
             }

@@ -138,6 +138,7 @@ public partial class Mahjong : MonoBehaviour
             }
         }
     }
+    
     /// <summary>
     /// 刻子の判定
     /// </summary>

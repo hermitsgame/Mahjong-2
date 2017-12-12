@@ -11,12 +11,6 @@ public enum TileType:byte
     TON = 31,NAN = 32,XIA = 33,PEI = 34,
     HAKU = 35,HATU = 36,CHUN = 37
 }
-public class Tile:MonoBehaviour
-{
-    public TileType type;
-    public bool isAkadora = false;
-    public bool isHand = false;
-}
 public class MahjongTileManager : MonoBehaviour{
 
     // 生成する牌のGameObject
@@ -151,7 +145,7 @@ public class MahjongTileManager : MonoBehaviour{
         mats[2] = new Material(this.tileMaterials[id]);
         rend.materials = mats;
         obj.name = id.ToString();
-        obj.AddComponent<Tile>().type = (TileType)id;
+        obj.GetComponent<Tile>().type = (TileType)id;
         return obj;
     }
 

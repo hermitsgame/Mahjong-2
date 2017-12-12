@@ -8,21 +8,29 @@ public enum PlaySide : byte
     TON = 31, NAN=32, XIA=33, PEI=34
 }
 // 場の状態を管理する
-public class FieldManager :MonoBehaviour{
-    
+public class FieldManager : MonoBehaviour
+{
+
     // 場の風
     static PlaySide fieldSide = PlaySide.TON;
 
     // 現在の手番の人の風
     static PlaySide currentPlayer = PlaySide.TON;
 
+    static TileType trashTile;
+
+    [SerializeField]
+    private Stack<GameObject> trashObj = new Stack<GameObject>();
+
     // Use this for initialization
-    void Start() {
+    void Start()
+    {
 
     }
 
     // Update is called once per frame
-    void Update() {
+    void Update()
+    {
 
     }
 
@@ -44,7 +52,7 @@ public class FieldManager :MonoBehaviour{
     /// <returns></returns>
     public static bool IsMyTurn(PlaySide player)
     {
-        return (player == FieldManager.currentPlayer)?true:false;
+        return (player == FieldManager.currentPlayer) ? true : false;
     }
 
     public static PlaySide FieldSide
@@ -55,5 +63,27 @@ public class FieldManager :MonoBehaviour{
     {
         get { return currentPlayer; }
         set { currentPlayer = value; }
+    }
+    public static TileType TrashTile
+    {
+        get { return trashTile; }
+        set
+        {
+            trashTile = value;
+            print(string.Format("Player {0}, trashedTile {1}", CurrentPlayer, trashTile));
+        }
+    }
+
+    public void AddTrashObj(GameObject obj)
+    {
+        this.trashObj.Push(obj);
+    }
+    public GameObject GetRecentTrashObj()
+    {
+        return this.trashObj.Peek();
+    }
+    public GameObject PopRecentTrashObj()
+    {
+        return this.trashObj.Pop();
     }
 }
