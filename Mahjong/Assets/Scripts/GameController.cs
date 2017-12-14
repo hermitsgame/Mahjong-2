@@ -147,6 +147,11 @@ public class GameController : MonoBehaviour {
         return (GetPlayerID(side) + 1) % PlayerNum;
     }
 
+    public Player[] Players
+    {
+        get { return this.players; }
+    }
+
     public static State GameStateProp
     {
         get { return state; }

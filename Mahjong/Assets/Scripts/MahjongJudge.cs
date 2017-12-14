@@ -560,22 +560,36 @@ public partial class Mahjong : MonoBehaviour {
             return true;
         return false;
     }
-    /*
-    bool canChi()
+    protected bool CheckNaki()
     {
-
-    }
-    bool canPon()
-    {
-        Tile trash = FieldManager.TrashTile;
-        for (int i = 1; i < this.Hand.Length; i++)
+        if (fieldManager.GetTrashObj.Count > 0)
         {
-
+            GameObject trashObj = this.fieldManager.GetTrashObj.Peek();
+            Tile tile = trashObj.GetComponent<Tile>();
+            return checkChi(trashObj, tile) | checkPon(trashObj, tile) | checkKan(trashObj, tile);
         }
+        return false;
     }
 
-    bool canKan()
+    bool checkChi(GameObject obj, Tile tile)
     {
+        int t = (int)tile.type;
+        // 左の人の捨て牌なら
+        if (tile.tileOwner != FieldManager.GetBeforePlaySide(playSide))
+            return false;
+        return true;
     }
-    */
+    bool checkPon(GameObject obj,Tile tile)
+    {
+        if (tile.tileOwner != this.playSide && this.Hand[(int)tile.type] >= 2)
+            return true;
+        return false;
+    }
+
+    bool checkKan(GameObject obj, Tile tile)
+    {
+        if (tile.tileOwner != this.playSide && this.Hand[(int)tile.type] >= 3)
+            return true;
+        return false;
+    }
 }

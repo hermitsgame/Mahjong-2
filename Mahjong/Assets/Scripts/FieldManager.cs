@@ -17,19 +17,11 @@ public class FieldManager : MonoBehaviour
     // 現在の手番の人の風
     static PlaySide currentPlayer = PlaySide.TON;
 
-    static TileType trashTile;
-
     [SerializeField]
     private Stack<GameObject> trashObj = new Stack<GameObject>();
 
     // Use this for initialization
     void Start()
-    {
-
-    }
-
-    // Update is called once per frame
-    void Update()
     {
 
     }
@@ -44,6 +36,14 @@ public class FieldManager : MonoBehaviour
         next++;
         if (next == 35) next = 31;
         CurrentPlayer = (PlaySide)next;
+    }
+
+    public static PlaySide GetBeforePlaySide(PlaySide player)
+    {
+        int before = (byte)player;
+        before--;
+        if (before == 30) before = 34;
+        return (PlaySide)before;
     }
     /// <summary>
     /// プレイヤーの手番かどうかを返す
@@ -64,26 +64,8 @@ public class FieldManager : MonoBehaviour
         get { return currentPlayer; }
         set { currentPlayer = value; }
     }
-    public static TileType TrashTile
+    public Stack<GameObject> GetTrashObj
     {
-        get { return trashTile; }
-        set
-        {
-            trashTile = value;
-            print(string.Format("Player {0}, trashedTile {1}", CurrentPlayer, trashTile));
-        }
-    }
-
-    public void AddTrashObj(GameObject obj)
-    {
-        this.trashObj.Push(obj);
-    }
-    public GameObject GetRecentTrashObj()
-    {
-        return this.trashObj.Peek();
-    }
-    public GameObject PopRecentTrashObj()
-    {
-        return this.trashObj.Pop();
+        get { return this.trashObj; }
     }
 }

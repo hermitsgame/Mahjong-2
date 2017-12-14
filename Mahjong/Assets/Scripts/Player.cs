@@ -10,12 +10,11 @@ public enum PlayerState
     TUMO,
     CUT_TILE,
     END_TURN,
-    WAIT_NAKI
+    WAIT_NAKI,
+    END_NAKI
 }
 public class Player : Mahjong {
 
-    MahjongTileManager tileManager;
-    FieldManager fieldManager;
 
     [SerializeField]
     private Text playsideText;
@@ -68,7 +67,6 @@ public class Player : Mahjong {
                         }
                         break;
                     case PlayerState.END_TURN:
-                        this.state = PlayerState.TUMO;
                         break;
                     default:
                         break;
@@ -76,7 +74,6 @@ public class Player : Mahjong {
             }
             else
             {
-                // canNaki
             }
         }
 
@@ -86,6 +83,7 @@ public class Player : Mahjong {
     {
         tileManager = GameObject.Find("FieldManager").GetComponent<MahjongTileManager>();
         fieldManager = GameObject.Find("FieldManager").GetComponent<FieldManager>();
+        gameController = GameObject.Find("GameController").GetComponent<GameController>();
         this.handField = this.transform.Find("Hand");
         this.trashField = this.transform.Find("Trash");
         this.myCamera = this.transform.GetComponentInChildren<Camera>();
@@ -127,7 +125,7 @@ public class Player : Mahjong {
         this.Hand[type]--;
         this.HandObj.Remove(hai);
 
-        this.fieldManager.AddTrashObj(hai);
+        this.fieldManager.GetTrashObj.Push(hai);
         /*
         TrashObj.ForEach((GameObject g) =>
         {
@@ -166,33 +164,12 @@ public class Player : Mahjong {
         destPos.x = col * tileManager.GetTileSize.x;
         destPos.z = - row * tileManager.GetTileSize.z;
 
-        StartCoroutine(Move(hai, destPos, duration));
-
         ArrangeHand();
+
+        StartCoroutine(hai.GetComponent<Tile>().Move(destPos, duration));
     }
 
-    IEnumerator Move(Transform hai, Vector3 dest, float duration)
-    {
-        float startTime = Time.time;
-        Vector3 startPos = hai.localPosition;
-        for (; Time.time - startTime < duration;)
-        {
-            hai.localPosition = Vector3.Lerp(startPos, dest, (Time.time - startTime) / duration);
-            yield return null;
-        }
-        hai.localPosition = dest;
-    }
-    IEnumerator Rotate(Transform hai, Vector3 dest, float duration)
-    {
-        float startTime = Time.time;
-        Vector3 startRot = Vector3.zero;
-        for (; Time.time - startTime < duration;)
-        {
-            hai.localEulerAngles = Vector3.Lerp(startRot, dest, (Time.time - startTime) / duration);
-            yield return null;
-        }
-        hai.localEulerAngles = dest;
-    }
+
     // リーパイする
     public void ArrangeHand()
     {
@@ -224,8 +201,6 @@ public class Player : Mahjong {
                 if (t.isHand)
                 {
                     ToTrashPos(t.transform, 0.2f);
-                    FieldManager.TrashTile = t.type;
-                    EndTurn();
                 }
             }
         }
@@ -234,8 +209,7 @@ public class Player : Mahjong {
     private void EndTurn()
     {
         FieldManager.PassMyTurn(this.playSide);
-        GameController gc = GameObject.Find("GameController").GetComponent<GameController>();
-        gc.SwitchCamera(gc.GetNextPlayerID(this.playSide));
+        gameController.SwitchCamera(gameController.GetNextPlayerID(this.playSide));
         this.state = PlayerState.END_TURN;
     }
 

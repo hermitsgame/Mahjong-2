@@ -5,6 +5,9 @@ using UnityEngine;
 public partial class Mahjong : MonoBehaviour
 {
 
+    protected MahjongTileManager tileManager;
+    protected FieldManager fieldManager;
+    protected GameController gameController;
     // 自分の風
     [SerializeField]
     protected PlaySide playSide = PlaySide.TON;
