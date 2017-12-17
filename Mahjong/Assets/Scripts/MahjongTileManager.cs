@@ -153,4 +153,8 @@ public class MahjongTileManager : MonoBehaviour{
     {
         get { return this.tileSize; }
     }
+    public GameObject[] GetAllTile
+    {
+        get { return this.AllTileObj;}
+    }
 }

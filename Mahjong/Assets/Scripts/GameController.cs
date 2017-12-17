@@ -25,6 +25,7 @@ public class GameController : MonoBehaviour {
 
     public static int ParentPlayer;
     public static int InitTumoPos; // 最初に牌をツモる位置
+    private int DoraPos;
 
     private MahjongTileManager tileManager;
 
@@ -78,6 +79,8 @@ public class GameController : MonoBehaviour {
         print(string.Format("yama {0} sum {1}", yama, sum));
         if (yama == 1) yama = 3; else if (yama == 3) yama = 1;
         InitTumoPos = yama * 34 + sum * 2;
+        this.DoraPos = (InitTumoPos - 2 * 3) % tileManager.GetAllTile.Length;
+        OpenDora();
         print("pos " + InitTumoPos);
     }
     IEnumerator Haipai()
@@ -107,6 +110,12 @@ public class GameController : MonoBehaviour {
         foreach (Camera c in cameras)
             c.enabled = false;
         cameras[id].enabled = true;
+    }
+
+    public void OpenDora()
+    {
+        GameObject doraObj = this.tileManager.GetAllTile[DoraPos];
+        doraObj.transform.localEulerAngles = Vector3.zero;
     }
 
     // utility
