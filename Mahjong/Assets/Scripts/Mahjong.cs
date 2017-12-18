@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public partial class Mahjong : MonoBehaviour
 {
@@ -8,6 +9,10 @@ public partial class Mahjong : MonoBehaviour
     protected MahjongTileManager tileManager;
     protected FieldManager fieldManager;
     protected GameController gameController;
+    protected PlayerState state = PlayerState.TUMO;
+
+    [SerializeField]
+    private Button[] nakiButtons; 
     // 自分の風
     [SerializeField]
     protected PlaySide playSide = PlaySide.TON;
@@ -203,6 +208,7 @@ public partial class Mahjong : MonoBehaviour
         this.Chows = new int[4];
         cntChows = cntPungs = head = 0;
     }
+
     // 場風を取得
     int Chanfon()
     {

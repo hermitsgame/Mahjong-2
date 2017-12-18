@@ -26,8 +26,6 @@ public class Player : Mahjong {
 
     private Transform handField, trashField;
 
-    private PlayerState state = PlayerState.TUMO;
-
     private Camera myCamera;
 
     [SerializeField]
@@ -74,6 +72,7 @@ public class Player : Mahjong {
             }
             else
             {
+
             }
         }
 
@@ -167,6 +166,7 @@ public class Player : Mahjong {
         ArrangeHand();
 
         StartCoroutine(hai.GetComponent<Tile>().Move(destPos, duration));
+
     }
 
 
@@ -201,16 +201,38 @@ public class Player : Mahjong {
                 if (t.isHand)
                 {
                     ToTrashPos(t.transform, 0.2f);
+                    OnTurnEnd();
                 }
             }
         }
+    }
+
+    private void OnTurnEnd()
+    {
+        foreach (Player p in gameController.Players)
+        {
+            if (!FieldManager.IsMyTurn(p.playSide))
+                p.CheckNaki();
+        }
+        StartCoroutine(WaitPlayers());
+    }
+
+    IEnumerator WaitPlayers()
+    {
+        for (int i = 0 ;i < gameController.Players.Length;i++)
+        {
+            for (;gameController.Players[i].state == PlayerState.WAIT_NAKI;)
+            {
+                yield return null;
+            }
+        }
+        EndTurn();
     }
 
     private void EndTurn()
     {
         FieldManager.PassMyTurn(this.playSide);
         gameController.SwitchCamera(gameController.GetNextPlayerID(this.playSide));
-        this.state = PlayerState.END_TURN;
     }
 
     public PlaySide PlaysideProp

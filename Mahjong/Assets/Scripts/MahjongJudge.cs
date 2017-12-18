@@ -560,15 +560,19 @@ public partial class Mahjong : MonoBehaviour {
             return true;
         return false;
     }
-    protected bool CheckNaki()
+    protected void CheckNaki()
     {
         if (fieldManager.GetTrashObj.Count > 0)
         {
             GameObject trashObj = this.fieldManager.GetTrashObj.Peek();
             Tile tile = trashObj.GetComponent<Tile>();
-            return checkChi(trashObj, tile) | checkPon(trashObj, tile) | checkKan(trashObj, tile);
+            if (checkChi(trashObj, tile) | checkPon(trashObj, tile) | checkKan(trashObj, tile))
+            {
+                print(string.Format("Player{0} : WaitNaki",this.playSide));
+                this.state = PlayerState.WAIT_NAKI;
+                //StartCoroutine(WaitNaki());
+            }
         }
-        return false;
     }
 
     bool checkChi(GameObject obj, Tile tile)
@@ -577,7 +581,20 @@ public partial class Mahjong : MonoBehaviour {
         // 左の人の捨て牌なら
         if (tile.tileOwner != FieldManager.GetBeforePlaySide(playSide))
             return false;
-        return true;
+        if (t % 10 > 2 && t % 10 < 8)
+        {
+            if (Hand[t - 1] > 0 && Hand[t + 1] > 0)
+                return true;
+            if (Hand[t - 2] > 0 && Hand[t - 1] > 0)
+                return true;
+            if (Hand[t + 2] > 0 && Hand[t + 1] > 0)
+                return true;
+        }
+        //else if(t % 10 > )
+        {
+
+        }
+        return false;
     }
     bool checkPon(GameObject obj,Tile tile)
     {
